@@ -1,12 +1,12 @@
 package com.masai.controller;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.masai.dto.ChatGPTRequest;
@@ -23,12 +23,19 @@ public class CustomBotController {
     private String apiURL;
 
     @Autowired
-    private RestTemplate template;
+    private RestTemplate restTemplate;
 
     @GetMapping("/chat")
-    public String chat(@RequestParam("prompt") String prompt){
-        ChatGPTRequest request=new ChatGPTRequest(model, prompt);
-        ChatGptResponse chatGptResponse = template.postForObject(apiURL, request, ChatGptResponse.class);
-        return chatGptResponse.getChoices().get(0).getMessage().getContent();
+    public ResponseEntity<String> chat(@RequestParam("prompt") String prompt) {
+        try {
+            ChatGPTRequest request = new ChatGPTRequest(model, prompt);
+            ChatGptResponse chatGptResponse = restTemplate.postForObject(apiURL, request, ChatGptResponse.class);
+            String responseContent = chatGptResponse.getChoices().get(0).getMessage().getContent();
+            return ResponseEntity.ok(responseContent);
+        } catch (HttpClientErrorException.TooManyRequests e) {
+            throw e;
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }

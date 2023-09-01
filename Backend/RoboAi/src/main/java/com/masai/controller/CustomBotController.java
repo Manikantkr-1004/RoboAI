@@ -29,6 +29,6 @@ public class CustomBotController {
     public String chat(@RequestParam("prompt") String prompt){
         ChatGPTRequest request=new ChatGPTRequest(model, prompt);
         ChatGptResponse chatGptResponse = template.postForObject(apiURL, request, ChatGptResponse.class);
-        return chatGptResponse.getChoices().get(0).getMessage().getFormat();
+        return chatGptResponse.getChoices().get(0).getMessage().getContent();
     }
 }

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Form = () => {
   const [role, setRole] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const[position, setPosition] = useState<string>("");
+  const navigate=useNavigate()
 
   const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRole(event.target.value);
@@ -55,15 +57,21 @@ const Form = () => {
    4.Hiring criteria : Options are Reject, Waitlist, Hire and Strong Hire
    Feedback for Subject Matter Expertise and Communication skills should contain ratings on my interview responses from 0 - 10`
    console.log(data)
+   navigate("/chat")
+   setContent("")
+   setName("")
+   setPosition("")
+   setRole("")
+
   };
   return (
     <div className='bg-hero-pattern bg-cover w-screen h-screen fixed top-0 left-0 z-[-1] '>
 
-    <div className='bg-[rgb(241,215,182)] w-1/3 h-screen rounded-lg p-6 ml-auto mr-10' >
+    <div className='bg-[rgb(241,215,182)] w-1/3 h-screen rounded-lg p-6 ml-auto ' >
       <h1 className='font-bold text-2xl mt-32 px-10'>Interview Initiation Form</h1>
-      <form action="" onSubmit={handleSubmit} className='px-10'>
+      <form onSubmit={handleSubmit} className='px-10'>
         <div className='p-4'>
-          <label className='shadow-#6 px-2 rounded-lg font-bold ' htmlFor="role">Role For AI</label>
+          <label className=' px-2 rounded-lg font-bold ' htmlFor="role">Role For AI</label>
           <div>
             <input
               type="text"
@@ -72,11 +80,12 @@ const Form = () => {
               value={role}
               onChange={handleRoleChange}
               className='shadow-input w-full p-2 rounded-lg' 
+              required
             />
           </div>
         </div>
         <div className='p-4'>
-          <label className='shadow-#6 px-2 rounded-lg font-bold' htmlFor="name">Your Name</label>
+          <label className=' px-2 rounded-lg font-bold' htmlFor="name">Your Name</label>
           <div>
             <input
               type="text"
@@ -85,24 +94,26 @@ const Form = () => {
               value={name}
               onChange={handleNameChange}
               className='shadow-input w-full p-2 rounded-lg' 
+              required
             />
           </div>
         </div>
         <div className='p-4'>
-          <label className='shadow-#6 px-2 rounded-lg font-bold' htmlFor="content">Position</label>
+          <label className=' px-2 rounded-lg font-bold' htmlFor="content">Position</label>
           <div>
             <input
               type="text"
               id="content"
               placeholder="Frontend,Backend Software...."
-              value={content}
+              value={position}
               onChange={handleContentPosition}
               className='shadow-input w-full p-2 rounded-lg' 
+              required
             />
           </div>
         </div>
         <div className='p-4'>
-          <label className='shadow-#6 px-2 rounded-lg font-bold' htmlFor="content">Content</label>
+          <label className=' px-2 rounded-lg font-bold' htmlFor="content">Content</label>
           <div>
             <input
               type="text"
@@ -111,6 +122,7 @@ const Form = () => {
               value={content}
               onChange={handleContentChange}
               className='shadow-input w-full p-2 rounded-lg' 
+              required
             />
           </div>
         </div>

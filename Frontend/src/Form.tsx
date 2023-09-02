@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 
 const Form = () => {
   const [role, setRole] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const[position, setPosition] = useState<string>("");
-  const navigate=useNavigate()
+  const navigate=useNavigate();
+  const [loading,setLoading] = useState<Boolean>(false);
+
+  useEffect(()=>{
+    localStorage.removeItem("AI")
+  },[])
 
   const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRole(event.target.value);
@@ -24,12 +30,13 @@ const Form = () => {
   };
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
     const data=`I want you to act as an ${role}. MY name is ${name} and I will be the candidate and you will ask me the interview questions for the position of ${position}.
    That will require me to have the following content
    
  ${content}
    
-    I want you to only reply as the interviewer. Do not write all the conservation at once. I want you to only do the technical interview with me on coding and ds algo. Ask me the questions and wait for my answers. I will say the phrase “start the interview” for you to start. Ask one question at a time  if I am not able to answer satisfactorily, give me feedback in this framework:
+    I want you to only reply as the ${role}. Do not write all the conservation at once. I want you to only do the technical interview with me on coding and dsa also. Ask me the questions and wait for my answers. I will say the phrase “start the interview” for you to start. Ask one question at a time  if I am not able to answer satisfactorily, give me feedback in this framework:
    ####
    If it is a Data Structures and Algorithms or a coding technical question then
    REACTO: 
@@ -56,14 +63,48 @@ const Form = () => {
    3. Problem Solving skills
    4.Hiring criteria : Options are Reject, Waitlist, Hire and Strong Hire
    Feedback for Subject Matter Expertise and Communication skills should contain ratings on my interview responses from 0 - 10`
-   console.log(data)
-   navigate("/chat")
-   setContent("")
-   setName("")
-   setPosition("")
-   setRole("")
+  //  console.log(data)
+  let arr:any = [];
+
+  // arr.push({
+  //       "gpt":`Hlo, I am a chat gpt of yiour interview, please ask me questions.`
+  //      })   
+  //   localStorage.setItem("AI",JSON.stringify(arr));
+  //   navigate("/chat")
+
+  axios.post(`https://api.openai.com/v1/chat/completions`, {
+  model: "gpt-3.5-turbo", // Specify the model
+  messages: [
+    { role: "system", content: data },
+  ],
+  }, {
+  headers: {
+    'Authorization': `Bearer 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`,
+    'Content-Type': 'application/json',
+  },
+  })
+  .then((res)=>{
+    setLoading(false);
+
+    const assistantReply = res.data.choices[0].message.content;
+    console.log(assistantReply);
+    
+    arr.push({ role: "system", content: assistantReply })
+    localStorage.setItem("AI",JSON.stringify(arr))
+
+    navigate("/chat")
+    setContent("")
+    setName("")
+    setPosition("")
+    setRole("")
+  }).catch((err)=>{
+    setLoading(false);
+    console.log(err);
+  })
 
   };
+
+
   return (
     <div className='bg-hero-pattern bg-cover w-screen h-screen fixed top-0 left-0 z-[-1] '>
 
@@ -127,7 +168,7 @@ const Form = () => {
           </div>
         </div>
         <div className='p-4'>
-          <input type="submit" value="Submit" className='bg-blue-500 text-white p-2 w-full rounded-lg cursor-pointer hover:bg-blue-900' />
+          <input type="submit" value={loading?"Starting....":"Start the Interview"} className='bg-blue-500 text-white p-2 w-full rounded-lg cursor-pointer hover:bg-blue-900' />
         </div>
       </form>
     </div>

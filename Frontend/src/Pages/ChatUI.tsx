@@ -1,18 +1,69 @@
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons"
-import { faMicrophone } from "@fortawesome/free-solid-svg-icons"
+import { faMicrophone, faUserSecret, faVideoCamera,faUserCircle, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useState } from "react"
+import { useState,useEffect, useRef } from "react"
 import audiomic from "../assets/mic.mp3"
 import bot from "../assets/bot.gif"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 export function ChatUI() {
 
     const mic = <FontAwesomeIcon size="lg" icon={faMicrophone} />
     const mic1 = <FontAwesomeIcon size="lg" fade icon={faMicrophone} />
     const send  = <FontAwesomeIcon size="lg" icon={faPaperPlane} />
+    const camerais  = <FontAwesomeIcon size="xl" shake icon={faVideoCamera} />
+    const user  = <FontAwesomeIcon size="lg" icon={faUserCircle} />
+    const gpt  = <FontAwesomeIcon size="lg" icon={faUserSecret} />
+    const spin = <FontAwesomeIcon size="lg" spin icon={faSpinner} />
+
     const [inp,setInp] = useState<String>("");
     const [check,setCheck] = useState<Boolean>(false);
     const [isPlaying, setIsPlaying] = useState<Boolean>(false);
+    const [camera,setCamera] = useState<Boolean>(false);
+    const [mockdata,setMockData] = useState<any>([]);
+    const [loading,setLoading] = useState<Boolean>(false);
+    const inputRef: React.MutableRefObject<null> = useRef(null);
+    const navigate = useNavigate()
+
+    useEffect(()=>{
+      let data = localStorage.getItem("AI");
+      data? setMockData(JSON.parse(data)) : setMockData([]);
+    },[mockdata])
+    
+    useEffect(() => {
+        // Use useEffect to run code when the component mounts
+    
+        const initializeCamera = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const videoElement = document.createElement("video");
+            setCamera(false)
+            videoElement.srcObject = stream;
+            videoElement.play();
+    
+            videoElement.style.width = "90%";
+            videoElement.style.height = "60%";
+            videoElement.style.borderRadius = "20px";
+            videoElement.style.margin = "auto";
+    
+            const container = document.getElementById("video-container");
+            if (container) {
+              container.appendChild(videoElement);
+            }
+          } catch (error) {
+            console.error("Camera access denied:", error);
+            alert("Please allow Camera Permission!!");
+            setCamera(true)
+          }
+        };
+    
+        initializeCamera(); // Call the function to initialize the camera when the component mounts
+    
+        return () => {
+          // Cleanup code (e.g., stop the camera stream) can go here if needed
+        };
+      }, []);
 
     const handleVoiceSearch = () => {
         if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -35,12 +86,12 @@ export function ChatUI() {
                 const speechResult = event.results[0][0].transcript;
                 
                 setInp(speechResult);
-                setCheck(false);
+                inputRef.current.focus();
             };
 
-            recognition.onend = () => {
-                setCheck(false);
-            };
+            recognition.onend = ()=>{
+              setCheck(false);
+            }
         
             recognition.start();
         } else {
@@ -49,29 +100,6 @@ export function ChatUI() {
         }
     };
 
-    window.onload = () => {
-        navigator.mediaDevices
-          .getUserMedia({ video: true })
-          .then((stream) => {
-            // User granted access to the camera, do something with the stream
-            const videoElement = document.createElement("video");
-            videoElement.srcObject = stream;
-            videoElement.play();
-
-            videoElement.style.width =  "90%";// Set the width in pixels
-            videoElement.style.height = "60%"; // Set the height in pixels
-            videoElement.style.borderRadius = "20px"
-            videoElement.style.margin = "auto";
-      
-            // Append the video element to your desired div
-            const container = document.getElementById("video-container");
-            container.appendChild(videoElement);
-          })
-          .catch((error) => {
-            console.error("Camera access denied:", error);
-            alert("Please allow Camera Permission!!")
-          });
-      };
 
       const handleKeyPress = (e:any) => {
         if (e.key === 'Enter') {
@@ -81,7 +109,104 @@ export function ChatUI() {
       };
 
       const handleSend = ()=>{
-        console.log(inp);
+        if(camera){
+          alert("Please Allow Camera Permission!!")
+          return;
+        }
+
+        if(inp===""){
+          return;
+        }
+        if(loading){
+          alert("Please Wait for Response");
+          return;
+        }
+
+        mockdata.push({ role: "user", content: inp })
+        localStorage.setItem("AI",JSON.stringify(mockdata))
+        window.scrollTo(0, document.body.scrollHeight);
+
+        // setTimeout(() => {
+        //   mockdata.push({
+        //     "gpt":"Thanks for asking this question, i am ready to give you answer please proceed."
+        //   })
+        //   localStorage.setItem("AI",JSON.stringify(mockdata))
+        //   window.scrollTo(0, document.body.scrollHeight);
+        // }, 2000);
+        setLoading(true);
+
+
+        axios.post(`https://api.openai.com/v1/chat/completions`, {
+        model: "gpt-3.5-turbo", // Specify the model
+        messages: mockdata,
+        }, {
+        headers: {
+          'Authorization': `Bearer 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`,
+          'Content-Type': 'application/json',
+        },
+        })
+        .then((res)=>{
+          setLoading(false);
+
+          const assistantReply = res.data.choices[0].message.content;
+          console.log(assistantReply);
+          
+          mockdata.push({ role: "system", content: assistantReply })
+          localStorage.setItem("AI",JSON.stringify(mockdata))
+          window.scrollTo(0, document.body.scrollHeight);
+
+        }).catch((err)=>{
+          setLoading(false);
+          console.log(err);
+        })
+
+        setInp("")
+      }
+
+      const handleEnd= ()=>{
+        if(camera){
+          alert("Please Allow Camera Permission!!")
+          return;
+        }
+
+        if(loading){
+          alert("Please Wait for Response");
+          return;
+        }
+
+        let arr = mockdata;
+
+        arr.push({ role: "user", content: "please give me feedback according to our chat conversation ,from 0-10 in communication skills and technical skills rate and in hiring criteria you can give Hire, Strong Hire, Waitlist, Rejected according to conversation and rated based(communication and technical)  like this :- Communication skills - 8/10 /n Technical Skills - 9/10 /n Hiring Criteria - Hire, and one more thing, don't give me description, give me only number like 8 , 9 , Hire like this" })
+        localStorage.setItem("AI",JSON.stringify(arr))
+        window.scrollTo(0, document.body.scrollHeight);
+
+        setLoading(true);
+
+
+        axios.post(`https://api.openai.com/v1/chat/completions`, {
+        model: "gpt-3.5-turbo", // Specify the model
+        messages: mockdata,
+        }, {
+        headers: {
+          'Authorization': `Bearer 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`,
+          'Content-Type': 'application/json',
+        },
+        })
+        .then((res)=>{
+          setLoading(false);
+
+          const assistantReply = res.data.choices[0].message.content;
+          console.log(assistantReply);
+          
+          localStorage.setItem("feedback",JSON.stringify(assistantReply));
+          navigate("/feedback")
+          localStorage.removeItem("AI");
+
+        }).catch((err)=>{
+          setLoading(false);
+          console.log(err);
+        })
+
         setInp("")
       }
       
@@ -90,20 +215,32 @@ export function ChatUI() {
     return (
         <>
         <div className="w-full h-full mb-30 flex gap-10 space-between">
-            <div style={{width:"400px"}} className="p-2 rounded-xl">
+            <div style={{width:"400px",position:"fixed"}} className="p-2 border-2 border-r-gray-950 ">
                 <div style={{width:"100%",margin:"auto"}}>
-                    <img style={{width:"50%",display:"block",margin:"auto"}} src={bot} alt="bot-image" />
+                    <img style={{width:"50%",height:"auto",display:"block",margin:"auto"}} src={bot} alt="bot-image" />
                 </div><br/><br/>
-                <div id="video-container" style={{width:"90%",height:"auto",margin:"auto"}}></div><br/><br/><br/>
+                <div id="video-container" style={{width:"90%",margin:"auto",marginBottom:"45px"}}></div>
+                {camera && <div className="font-bold text-xl mt-10 text-center text-red-500">Please Allow Camera Permission, It is required!!</div>}
+                {camera && <div className="font-bold text-2xl mb-40 text-center text-red-500">{camerais}</div>}
             </div>
-            <div className="w-60% h-100% border border-gray-950"></div>
+            <div className="w-60% mr-5 mb-20 ml-auto h-100%">
+              {
+                mockdata.map((item:any)=>(
+                  <div style={{width:"850px"}}>
+                    {item.role==="system" && <h1 className="bg-gray-200 w-100% p-2 rounded-xl mt-2">{gpt} {item.content}</h1>}
+                    {item.role==="user" && <h1 className="w-100% bg-amber-100 p-2 mt-2 rounded-xl">{user} {item.content}</h1> }
+                  </div>
+                ))
+              }
+            </div>
         </div>
         <div className="w-full fixed bottom-0 z-9999 flex" >
-            <input value={inp} onKeyPress={handleKeyPress} onChange={(e)=> setInp(e.target.value)} className="flex-grow border-2 border-black focus:border-custom-focus outline-none p-2" placeholder="Type...." />
-            <div onClick={handleSend} className="flex items-center pl-4 pr-4 justify-center bg-gray-950 hover:bg-gray-950 text-gray-50 cursor-pointer border-r border-white">{send}</div>
+            <input ref={inputRef} value={inp} onKeyPress={handleKeyPress} onChange={(e)=> setInp(e.target.value)} className="flex-grow border-2 border-black focus:border-custom-focus outline-none p-2" placeholder="Type...." />
+            <div onClick={handleSend} style={{background:inp===""?"black":"green"}} className="flex items-center pl-4 pr-4 justify-center text-gray-50 cursor-pointer border-r border-white">{loading? spin:send}</div>
             <div onClick={handleVoiceSearch} className="flex items-center pl-4 pr-4 justify-center bg-gray-950 hover:bg-gray-950 text-gray-50 cursor-pointer">{check? mic1:mic}</div>
         </div>
         {isPlaying && <audio src={audiomic} autoPlay></audio>}
+        <button onClick={handleEnd} style={{background:"black",color:"white",position:"fixed",bottom:"50px",right:"20px",borderRadius:"10px",padding:"5px 7px"}}>End the Interview</button>
         </>
     )
 }

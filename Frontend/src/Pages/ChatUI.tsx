@@ -141,7 +141,7 @@ export function ChatUI() {
         messages: mockdata,
         }, {
         headers: {
-          'Authorization': `Bearer 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`,
+          'Authorization': `Bearer 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`,
           'Content-Type': 'application/json',
         },
         })
@@ -176,7 +176,7 @@ export function ChatUI() {
 
         let arr = mockdata;
 
-        arr.push({ role: "user", content: "please give me feedback according to our chat conversation ,from 0-10 in communication skills and technical skills rate and in hiring criteria you can give Hire, Strong Hire, Waitlist, Rejected according to conversation and rated based(communication and technical)  like this :- Communication skills - 8/10 /n Technical Skills - 9/10 /n Hiring Criteria - Hire, and one more thing, don't give me description, give me only number like 8 , 9 , Hire like this" })
+        arr.push({ role: "user", content: "please give me feedback according to our chat conversation ,from 0-10 in communication skills and technical skills rate and in hiring criteria you can give Hire, Strong Hire, Waitlist, Rejected according to conversation and rated based(communication and technical)  like this :- Communication skills - 0-10/10 /n Technical Skills - 0-10/10 /n Hiring Criteria - Hire/Strong Hire/Rejected/Waitlist, and one more thing, don't give me description, give me only number like 8 , 9 , Hire like this" })
         localStorage.setItem("AI",JSON.stringify(arr))
         window.scrollTo(0, document.body.scrollHeight);
 
@@ -188,7 +188,7 @@ export function ChatUI() {
         messages: mockdata,
         }, {
         headers: {
-          'Authorization': `Bearer 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`,
+          'Authorization': `Bearer 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`,
           'Content-Type': 'application/json',
         },
         })
@@ -219,7 +219,7 @@ export function ChatUI() {
                 <div style={{width:"100%",margin:"auto"}}>
                     <img style={{width:"50%",height:"auto",display:"block",margin:"auto"}} src={bot} alt="bot-image" />
                 </div><br/><br/>
-                <div id="video-container" style={{width:"90%",margin:"auto",marginBottom:"45px"}}></div>
+                <div id="video-container" style={{width:"90%",margin:"auto",marginBottom:"110px"}}></div>
                 {camera && <div className="font-bold text-xl mt-10 text-center text-red-500">Please Allow Camera Permission, It is required!!</div>}
                 {camera && <div className="font-bold text-2xl mb-40 text-center text-red-500">{camerais}</div>}
             </div>

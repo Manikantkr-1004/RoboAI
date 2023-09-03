@@ -1,14 +1,30 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef,useState } from 'react';
 import Chart from 'chart.js/auto';
+import { Navbar } from '../Routes/Navbar';
+import { Navigate } from 'react-router-dom';
 
 export function Feedback() {
-  let str = localStorage.getItem("feedback");
-  let data;
-  str ? (data = JSON.parse(str)) : (data = "");
-  const extractedPart = data.match(/Communication skills: [\d/]+|Technical skills: [\d/]+|Hiring criteria: [\w]+/gi).join('\n');
-  let feed = extractedPart.split(":");
 
   const chartRef = useRef<HTMLCanvasElement | null>(null);
+
+  const [data,setData] = useState<any>([])
+  const [hiring,setHiring] = useState<String>("")
+
+    useEffect(()=>{
+        let str = localStorage.getItem("feedback");
+        let data;
+        str? data=JSON.parse(str): data=undefined;
+        
+        if(data===undefined){
+            setData(undefined);
+            return;
+        }
+        const extractedPart = data?.match(/\d+/g);
+        const hired = data?.match(/(Hire|Strong Hire|Waitlist|Rejected)/)
+        
+        setData(extractedPart)
+        setHiring(hired[0])
+    },[])
 
   useEffect(() => {
    
@@ -28,20 +44,29 @@ export function Feedback() {
       new Chart(chartRef.current, config);
     }
   }, []);
+  
+if(!data){
+  return <Navigate to="/" />
+}
+  
 
   return (
+    <>
+    <Navbar />
     <div>
 
-    <div className='w-1/3 m-auto mt-10 bg-red-200  rounded-full'>
-      <h1 className='text-center font-bold p-2'>Communication Skills:- {feed[1].split("\n")[0].split("/")[0]}/10</h1>
-      <h1 className='text-center font-bold pb-2'>Technical Skills:- {feed[2].split("\n")[0].split("/")[0]}/10</h1>
-      <h1 className='text-center font-bold pb-2'>Hiring Criteria:- {feed[3]}</h1>
+    <div style={{width:"400px"}} className='m-auto mt-28 bg-red-200  rounded-full'>
+      <h1 className='text-center font-bold p-2'>Communication Skills:- {data[0]}/10</h1>
+      <h1 className='text-center font-bold pb-2'>Technical Skills:- {data[2]}/10</h1>
+      <h1 className='text-center font-bold pb-2'>Hiring Criteria:- {hiring}</h1>
     </div>
     <br />
-    <div className='w-1/3 m-auto'>
+    <div style={{width:"400px"}} className='m-auto'>
 
     <canvas ref={chartRef} />
+    </div><br/>
+    <h1 className='text-center  font-bold text-xl'>This is the feedback based on Your Interview with AI.</h1><br/><br/>
     </div>
-    </div>
+    </>
   );
 }

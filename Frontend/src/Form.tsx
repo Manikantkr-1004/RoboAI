@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const Form = () => {
+
+  
   const [role, setRole] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const[position, setPosition] = useState<string>("");
   const navigate=useNavigate();
   const [loading,setLoading] = useState<Boolean>(false);
+  const spin = <FontAwesomeIcon size="lg" spin icon={faSpinner} />
 
   useEffect(()=>{
     localStorage.removeItem("AI")
@@ -73,13 +78,13 @@ const Form = () => {
   //   navigate("/chat")
 
   axios.post(`https://api.openai.com/v1/chat/completions`, {
-  model: "gpt-3.5-turbo", // Specify the model
+  model: `gpt-3.5-turbo`, // Specify the model
   messages: [
     { role: "system", content: data },
   ],
   }, {
   headers: {
-    'Authorization': `Bearer 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`,
+    'Authorization': `Bearer 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`,
     'Content-Type': 'application/json',
   },
   })
@@ -108,8 +113,8 @@ const Form = () => {
   return (
     <div className='bg-hero-pattern bg-cover w-screen h-screen fixed top-0 left-0 z-[-1] '>
 
-    <div className='bg-[rgb(241,215,182)] w-1/3 h-screen rounded-lg p-6 ml-auto ' >
-      <h1 className='font-bold text-2xl mt-32 px-10'>Interview Initiation Form</h1>
+    <div id='form' style={{boxShadow: "rgb(241,215,182) -30px 13px 25px",width:"450px"}} className='bg-[rgb(241,215,182)] h-screen rounded-lg p-4 ml-auto ' >
+      <h1 className='font-bold text-2xl mt-24 px-10'>Interview Initiation Form</h1>
       <form onSubmit={handleSubmit} className='px-10'>
         <div className='p-4'>
           <label className=' px-2 rounded-lg font-bold ' htmlFor="role">Role For AI</label>
@@ -168,7 +173,7 @@ const Form = () => {
           </div>
         </div>
         <div className='p-4'>
-          <input type="submit" value={loading?"Starting....":"Start the Interview"} className='bg-blue-500 text-white p-2 w-full rounded-lg cursor-pointer hover:bg-blue-900' />
+          <button type="submit" className='bg-blue-500 text-white p-2 w-full rounded-lg cursor-pointer hover:bg-blue-900'>{loading?spin:"Start the Interview"}</button>
         </div>
       </form>
     </div>

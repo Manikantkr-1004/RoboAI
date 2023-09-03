@@ -5,10 +5,11 @@ import { useState,useEffect, useRef } from "react"
 import audiomic from "../assets/mic.mp3"
 import bot from "../assets/bot.gif"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
+
 
 export function ChatUI() {
-
+  
     const mic = <FontAwesomeIcon size="lg" icon={faMicrophone} />
     const mic1 = <FontAwesomeIcon size="lg" fade icon={faMicrophone} />
     const send  = <FontAwesomeIcon size="lg" icon={faPaperPlane} />
@@ -23,7 +24,7 @@ export function ChatUI() {
     const [camera,setCamera] = useState<Boolean>(false);
     const [mockdata,setMockData] = useState<any>([]);
     const [loading,setLoading] = useState<Boolean>(false);
-    const inputRef: React.MutableRefObject<null> = useRef(null);
+    const inputRef: any = useRef(null);
     const navigate = useNavigate()
 
     useEffect(()=>{
@@ -33,6 +34,10 @@ export function ChatUI() {
     
     useEffect(() => {
         // Use useEffect to run code when the component mounts
+        let data = localStorage.getItem("AI");
+        if(!data){
+          return;
+        }
     
         const initializeCamera = async () => {
           try {
@@ -105,6 +110,7 @@ export function ChatUI() {
         if (e.key === 'Enter') {
           // "Enter" key was pressed
           handleSend();
+          window.scrollTo(0, document.body.scrollHeight);
         }
       };
 
@@ -137,11 +143,11 @@ export function ChatUI() {
 
 
         axios.post(`https://api.openai.com/v1/chat/completions`, {
-        model: "gpt-3.5-turbo", // Specify the model
+        model: `gpt-3.5-turbo`, // Specify the model
         messages: mockdata,
         }, {
         headers: {
-          'Authorization': `Bearer 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`,
+          'Authorization': `Bearer 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`,
           'Content-Type': 'application/json',
         },
         })
@@ -184,11 +190,11 @@ export function ChatUI() {
 
 
         axios.post(`https://api.openai.com/v1/chat/completions`, {
-        model: "gpt-3.5-turbo", // Specify the model
+        model: `gpt-3.5-turbo`, // Specify the model
         messages: mockdata,
         }, {
         headers: {
-          'Authorization': `Bearer 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`,
+          'Authorization': `Bearer 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`,
           'Content-Type': 'application/json',
         },
         })
@@ -210,12 +216,15 @@ export function ChatUI() {
         setInp("")
       }
       
-    
+      let data = localStorage.getItem("AI");
+      if(!data){
+        return <Navigate to="/" />;
+      }
     
     return (
         <>
-        <div className="w-full h-full mb-30 flex gap-10 space-between">
-            <div style={{width:"400px",position:"fixed"}} className="p-2 border-2 border-r-gray-950 ">
+        <div className="w-full h-full mb-30 flex gap-10 space-between ">
+            <div style={{width:"400px",position:"fixed"}} className="p-2 border-2 border-r-gray-950 flex flex-col hidden md:block sm:block base:block lg:block">
                 <div style={{width:"100%",margin:"auto"}}>
                     <img style={{width:"50%",height:"auto",display:"block",margin:"auto"}} src={bot} alt="bot-image" />
                 </div><br/><br/>
@@ -223,7 +232,7 @@ export function ChatUI() {
                 {camera && <div className="font-bold text-xl mt-10 text-center text-red-500">Please Allow Camera Permission, It is required!!</div>}
                 {camera && <div className="font-bold text-2xl mb-40 text-center text-red-500">{camerais}</div>}
             </div>
-            <div className="w-60% mr-5 mb-20 ml-auto h-100%">
+            <div style={{width:"60%"}} className="mr-20 mb-20 ml-auto h-100%">
               {
                 mockdata.map((item:any)=>(
                   <div style={{width:"850px"}}>
@@ -240,7 +249,7 @@ export function ChatUI() {
             <div onClick={handleVoiceSearch} className="flex items-center pl-4 pr-4 justify-center bg-gray-950 hover:bg-gray-950 text-gray-50 cursor-pointer">{check? mic1:mic}</div>
         </div>
         {isPlaying && <audio src={audiomic} autoPlay></audio>}
-        <button onClick={handleEnd} style={{background:"black",color:"white",position:"fixed",bottom:"50px",right:"20px",borderRadius:"10px",padding:"5px 7px"}}>End the Interview</button>
+        {!loading && <button onClick={handleEnd} style={{boxShadow:"#000 2px 2px 2px",background:"black",color:"white",position:"fixed",bottom:"50px",right:"400px",borderRadius:"10px",padding:"5px 7px"}}>End the Interview</button>}
         </>
     )
 }

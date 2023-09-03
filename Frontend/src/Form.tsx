@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {apiurl,apimodel,apikey} from "../api/secret"
 
 const Form = () => {
 
@@ -77,14 +78,14 @@ const Form = () => {
   //   localStorage.setItem("AI",JSON.stringify(arr));
   //   navigate("/chat")
 
-  axios.post(`https://api.openai.com/v1/chat/completions`, {
-  model: `gpt-3.5-turbo`, // Specify the model
+  axios.post(apiurl, {
+  model: apimodel, // Specify the model
   messages: [
     { role: "system", content: data },
   ],
   }, {
   headers: {
-    'Authorization': `Bearer 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`,
+    'Authorization': `Bearer ${apikey}`,
     'Content-Type': 'application/json',
   },
   })

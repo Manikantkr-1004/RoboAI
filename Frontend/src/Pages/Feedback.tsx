@@ -1,4 +1,4 @@
-import React, { useEffect, useRef,useState } from 'react';
+import { useEffect, useRef,useState } from 'react';
 import Chart from 'chart.js/auto';
 import { Navbar } from '../Routes/Navbar';
 import { Navigate } from 'react-router-dom';
@@ -8,6 +8,8 @@ export function Feedback() {
   const chartRef = useRef<HTMLCanvasElement | null>(null);
 
   const [data,setData] = useState<any>([])
+  let first:Number;
+  let second:Number;
   const [hiring,setHiring] = useState<String>("")
 
     useEffect(()=>{
@@ -23,19 +25,22 @@ export function Feedback() {
         const hired = data?.match(/(Hire|Strong Hire|Waitlist|Rejected)/)
         
         setData(extractedPart)
+        first = +extractedPart[0];
+        second = +extractedPart[2];
         setHiring(hired[0])
     },[])
+
 
   useEffect(() => {
    
     if (chartRef.current) {
-      const config = {
+      const config:any = {
         type: 'doughnut',
         data: {
           labels: ['Communication Skills', 'Technical Skills'],
           datasets: [
             {
-              data: [8, 7],
+              data: [first, second],
               backgroundColor: ['#FF5733', '#3366CC'],
             },
           ],

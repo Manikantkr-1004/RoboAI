@@ -6,6 +6,7 @@ import audiomic from "../assets/mic.mp3"
 import bot from "../assets/bot.gif"
 import axios from "axios"
 import { Navigate, useNavigate } from "react-router-dom"
+import {apiurl,apimodel,apikey} from "../../api/secret"
 
 
 export function ChatUI() {
@@ -18,7 +19,7 @@ export function ChatUI() {
     const gpt  = <FontAwesomeIcon size="lg" icon={faUserSecret} />
     const spin = <FontAwesomeIcon size="lg" spin icon={faSpinner} />
 
-    const [inp,setInp] = useState<String>("");
+    const [inp,setInp] = useState<any>("");
     const [check,setCheck] = useState<Boolean>(false);
     const [isPlaying, setIsPlaying] = useState<Boolean>(false);
     const [camera,setCamera] = useState<Boolean>(false);
@@ -142,12 +143,12 @@ export function ChatUI() {
         setLoading(true);
 
 
-        axios.post(`https://api.openai.com/v1/chat/completions`, {
-        model: `gpt-3.5-turbo`, // Specify the model
+        axios.post(apiurl, {
+        model: apimodel, // Specify the model
         messages: mockdata,
         }, {
         headers: {
-          'Authorization': `Bearer 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`,
+          'Authorization': `Bearer ${apikey}`,
           'Content-Type': 'application/json',
         },
         })
@@ -189,12 +190,12 @@ export function ChatUI() {
         setLoading(true);
 
 
-        axios.post(`https://api.openai.com/v1/chat/completions`, {
-        model: `gpt-3.5-turbo`, // Specify the model
+        axios.post(apiurl, {
+        model: apimodel, // Specify the model
         messages: mockdata,
         }, {
         headers: {
-          'Authorization': `Bearer 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`,
+          'Authorization': `Bearer ${apikey}`,
           'Content-Type': 'application/json',
         },
         })

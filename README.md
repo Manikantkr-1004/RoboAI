@@ -23,7 +23,7 @@ The website has been built by the imagination of the team members but the centra
 
 FRONTEND -
 
-React | Redux | tailwindcss | Thunk | Javascript | HTML5 | CSS3 | Thunk | Axios
+React | Redux | tailwindcss | Thunk | TrpeScript | HTML5 | CSS3 | Axios
 
 BACKEND -
 

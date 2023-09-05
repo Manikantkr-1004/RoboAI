@@ -7,6 +7,7 @@ export function Home() {
     useEffect(()=>{
         localStorage.removeItem("feedback");
         localStorage.removeItem("AI");
+        localStorage.removeItem("voice");
     },[])
 
     return (

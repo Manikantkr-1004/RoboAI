@@ -7,6 +7,9 @@ import bot from "../assets/bot.gif"
 import axios from "axios"
 import { Navigate, useNavigate } from "react-router-dom"
 import {apiurl,apimodel,apikey} from "../../api/secret"
+// @ts-ignore
+import {useSpeechSynthesis}  from 'react-speech-kit';
+import { Helmet } from "react-helmet"
 
 
 export function ChatUI() {
@@ -19,6 +22,7 @@ export function ChatUI() {
     const gpt  = <FontAwesomeIcon size="lg" icon={faUserSecret} />
     const spin = <FontAwesomeIcon size="lg" spin icon={faSpinner} />
 
+    const { speak, cancel } = useSpeechSynthesis();
     const [inp,setInp] = useState<any>("");
     const [check,setCheck] = useState<Boolean>(false);
     const [isPlaying, setIsPlaying] = useState<Boolean>(false);
@@ -27,10 +31,22 @@ export function ChatUI() {
     const [loading,setLoading] = useState<Boolean>(false);
     const inputRef: any = useRef(null);
     const navigate = useNavigate()
+    let mediaStream: MediaStream | null = null;
+    const [reading,setReading] = useState<Boolean>(false)
 
     useEffect(()=>{
       let data = localStorage.getItem("AI");
       data? setMockData(JSON.parse(data)) : setMockData([]);
+
+      if(!reading){
+        let te = localStorage.getItem("voice");
+        let tex ;
+        te? tex = te: tex = "";    
+        speak({text: tex})
+        cancel()
+        setReading(true);
+      }
+
     },[mockdata])
     
     useEffect(() => {
@@ -43,6 +59,7 @@ export function ChatUI() {
         const initializeCamera = async () => {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            mediaStream = stream;
             const videoElement = document.createElement("video");
             setCamera(false)
             videoElement.srcObject = stream;
@@ -67,7 +84,12 @@ export function ChatUI() {
         initializeCamera(); // Call the function to initialize the camera when the component mounts
     
         return () => {
-          // Cleanup code (e.g., stop the camera stream) can go here if needed
+          // Cleanup code to stop the camera stream when the component unmounts
+          if (mediaStream) {
+            mediaStream.getTracks().forEach((track) => {
+              track.stop();
+            });
+          }
         };
       }, []);
 
@@ -157,6 +179,8 @@ export function ChatUI() {
 
           const assistantReply = res.data.choices[0].message.content;
           console.log(assistantReply);
+
+          speak({ text: assistantReply});
           
           mockdata.push({ role: "system", content: assistantReply })
           localStorage.setItem("AI",JSON.stringify(mockdata))
@@ -216,6 +240,8 @@ export function ChatUI() {
 
         setInp("")
       }
+
+
       
       let data = localStorage.getItem("AI");
       if(!data){
@@ -224,6 +250,9 @@ export function ChatUI() {
     
     return (
         <>
+        <Helmet>
+          <title>{camera ? "Please Allow Camera": loading? "Wait for Response": "Interview Started | RoboAI"}</title>
+        </Helmet>
         <div className="w-full h-full mb-30 flex gap-10 space-between ">
             <div style={{width:"400px",position:"fixed"}} className="p-2 border-2 border-r-gray-950 flex flex-col hidden md:block sm:block base:block lg:block">
                 <div style={{width:"100%",margin:"auto"}}>

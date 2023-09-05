@@ -94,6 +94,8 @@ const Form = () => {
 
     const assistantReply = res.data.choices[0].message.content;
     console.log(assistantReply);
+
+    localStorage.setItem("voice",assistantReply);
     
     arr.push({ role: "system", content: assistantReply })
     localStorage.setItem("AI",JSON.stringify(arr))

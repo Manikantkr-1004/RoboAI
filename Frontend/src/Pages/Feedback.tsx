@@ -2,6 +2,7 @@ import { useEffect, useRef,useState } from 'react';
 import Chart from 'chart.js/auto';
 import { Navbar } from '../Routes/Navbar';
 import { Navigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 export function Feedback() {
 
@@ -58,6 +59,9 @@ if(!data){
   return (
     <>
     <Navbar />
+    <Helmet>
+      <title>Your Feedback</title>
+    </Helmet>
     <div>
 
     <div style={{width:"400px"}} className='m-auto mt-28 bg-red-200  rounded-full'>
